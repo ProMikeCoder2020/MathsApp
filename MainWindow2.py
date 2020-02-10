@@ -1,5 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtWidgets import QMainWindow, QMessageBox
 from MyMath import evaluate_expression
 import sys
 
@@ -26,7 +26,7 @@ class Ui_Form(QMainWindow):
         self.setupUi()
         self.reset_calculator()
         self.previous_calculator_changes = []
-        self.previous_text = ("", 0)
+        self.previous_text = ("", 0, False, False)
 
     def setupUi(self):
         self.setObjectName("Form")
@@ -721,12 +721,12 @@ class Ui_Form(QMainWindow):
 
         elif button_type == "show_memory":
             text = (F"{self.Advanced_calculator_sheet.toPlainText()}Memory = {self.memory}\n", "restart")
-            self.Advanced_calculator_sheet.setPlainText(text)
+            self.Advanced_calculator_sheet.setPlainText(text[0])
             self.reset_calculator()
 
         if button_type == "undo":
             if self.previous_calculator_changes == []:
-                self.previous_calculator_changes.append(("", 0))
+                self.previous_calculator_changes.append(("", 0, False, False))
             print(self.previous_calculator_changes)
             self.Advanced_calculator_sheet.setPlainText(self.previous_calculator_changes[-1][0])
             cursor_info = self.previous_calculator_changes[-1][1]
@@ -754,6 +754,14 @@ class Ui_Form(QMainWindow):
         self.cursor_index = 0
 
     def change_memory(self, m):
+        msg = QMessageBox()
+        msg.setWindowTitle("Operation completed")
+        msg.setText(f"Memory changed to {m}")
+        msg.setIcon(QMessageBox.Information)
+        msg.setDetailedText(f"The value kept in memory by the calculator has changed to {m}, "
+                            f"because you performed one of the following actions: mc(set memory to 0), "
+                            f"m+(add result to memory), m-(subtract result to memory).")
+        msg.exec_()
         self.memory = m
 
 
