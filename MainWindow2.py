@@ -21,8 +21,12 @@ class Ui_Form(QMainWindow):
 
     def __init__(self):
         super(Ui_Form, self).__init__()
+        self.memory = 0
+        self.result = 0
         self.setupUi()
         self.reset_calculator()
+        self.previous_calculator_changes = []
+        self.previous_text = ("", 0)
 
     def setupUi(self):
         self.setObjectName("Form")
@@ -644,6 +648,16 @@ class Ui_Form(QMainWindow):
 
         self.equal_button.clicked.connect(lambda: self.evaluate_calculator_button("equals"))
 
+        self.mr_button.clicked.connect(lambda: self.evaluate_calculator_button("show_memory"))
+
+        self.mc_button.clicked.connect(lambda: self.change_memory(0))
+
+        self.mPlus_button.clicked.connect(lambda: self.change_memory(self.memory + self.result))
+
+        self.mMinus_button.clicked.connect(lambda: self.change_memory(self.memory - self.result))
+
+        self.undo_button.clicked.connect(lambda: self.evaluate_calculator_button("undo"))
+
     def evaluate_calculator_button(self, button_type="digit"):
         calculator_text = "\n".join( self.Advanced_calculator_sheet.toPlainText().split("\n")[:-1])
         calculator_text += "\n" if calculator_text != "" else ""
@@ -658,26 +672,26 @@ class Ui_Form(QMainWindow):
         if button_type == "digit":
             self.cursor_index += 1
             self.number_typed = True if self.sender().text() not in ["(", ")"] else False
-            self.Advanced_calculator_sheet.setText(F"{calculator_text}"
-                                                   F"{button_text}")
+            text = (F"{calculator_text}{button_text}", self.cursor_index)
+            self.Advanced_calculator_sheet.setText(text[0])
+
         elif button_type == "operator":
-            print(calculator_text)
-            print(button_text, end="b\n")
             if not negative_number:
                 self.cursor_index += 4 + len(self.sender().text())
-                self.Advanced_calculator_sheet.toPlainText()
-                self.Advanced_calculator_sheet.setText(F"{calculator_text}  {button_text}")
+                text = (F"{calculator_text}  {button_text}", self.cursor_index)
+                self.Advanced_calculator_sheet.setText(text[0])
             else:
                 self.cursor_index += 1
-                self.Advanced_calculator_sheet.setText(F"{calculator_text}{button_text}")
+                text = (F"{calculator_text}{button_text}", self.cursor_index)
+                self.Advanced_calculator_sheet.setText(text[0])
             self.number_typed = False
 
         elif button_type == "function":
             self.cursor_index += len(self.sender().text()) - 1
+            text = (F"{calculator_text}{button_text}", self.cursor_index)
             self.func_typed = True
             self.number_typed = False
-            self.Advanced_calculator_sheet.setText(
-                F"{calculator_text}{button_text}")
+            self.Advanced_calculator_sheet.setText(text[0])
 
         elif button_type == "equals":
             expression = ""
@@ -694,25 +708,53 @@ class Ui_Form(QMainWindow):
                     else:
                         is_log = False
             calculator_text += ")" if self.func_typed else ""
-            self.Advanced_calculator_sheet.setText(
-                F"{calculator_text} = {evaluate_expression(expression)}\n")
-            self.func_typed = False
-            self.number_typed = False
-            self.cursor_index = 0
+            result = evaluate_expression(expression)
+            text = (F"{calculator_text} = {result}\n", "restart")
+            self.Advanced_calculator_sheet.setText(text[0])
+            self.reset_calculator()
+            self.result = result
 
         elif button_type == "clean":
+            text = ("", "restart")
+            self.Advanced_calculator_sheet.setText("")
             self.reset_calculator()
+
+        elif button_type == "show_memory":
+            text = (F"{self.Advanced_calculator_sheet.toPlainText()}Memory = {self.memory}\n", "restart")
+            self.Advanced_calculator_sheet.setPlainText(text)
+            self.reset_calculator()
+
+        if button_type == "undo":
+            if self.previous_calculator_changes == []:
+                self.previous_calculator_changes.append(("", 0))
+            print(self.previous_calculator_changes)
+            self.Advanced_calculator_sheet.setPlainText(self.previous_calculator_changes[-1][0])
+            cursor_info = self.previous_calculator_changes[-1][1]
+            if cursor_info == "restart":
+                self.reset_calculator()
+            else:
+                self.cursor_index = cursor_info
+                self.number_typed = self.previous_calculator_changes[-1][2]
+                self.func_typed = self.previous_calculator_changes[-1][3]
+            self.previous_calculator_changes.pop(-1)
+        else:
+            self.previous_calculator_changes.append(self.previous_text)
+            self.previous_text = text + (self.number_typed, self.func_typed)
 
     def keyPressEvent(self, key):
         if key.text() == "d":
             self.func_typed = False
             self.cursor_index += 1
+            self.previous_calculator_changes.append(self.previous_text)
+            self.previous_text = (self.Advanced_calculator_sheet.toPlainText(), self.cursor_index, self.number_typed, self.func_typed)
 
     def reset_calculator(self):
-        self.Advanced_calculator_sheet.setText("")
         self.func_typed = False
         self.number_typed = False
         self.cursor_index = 0
+
+    def change_memory(self, m):
+        self.memory = m
 
 
 if __name__ == "__main__":
