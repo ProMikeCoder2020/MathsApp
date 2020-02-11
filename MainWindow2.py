@@ -1,6 +1,6 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMainWindow, QMessageBox
-from MyMath import evaluate_expression
+from MyMath import evaluate_maths_expression, evaluate_logic_expression
 import sys
 
 sys._excepthook = sys.excepthook
@@ -162,6 +162,7 @@ class Ui_Form(QMainWindow):
         self.choose_logic_operator_cb = QtWidgets.QComboBox(self.logic_calculatorframe)
         self.choose_logic_operator_cb.setGeometry(QtCore.QRect(230, 100, 101, 61))
         self.choose_logic_operator_cb.setObjectName("choose_logic_operator_cb")
+        self.choose_logic_operator_cb.addItem("")
         self.choose_logic_operator_cb.addItem("")
         self.choose_logic_operator_cb.addItem("")
         self.choose_logic_operator_cb.addItem("")
@@ -588,12 +589,13 @@ class Ui_Form(QMainWindow):
         self.choose_logic_value_1_cb.setItemText(1, _translate("Form", "False"))
         self.choose_logic_value_2_cb.setItemText(0, _translate("Form", "True"))
         self.choose_logic_value_2_cb.setItemText(1, _translate("Form", "False"))
-        self.choose_logic_operator_cb.setItemText(0, _translate("Form", "Or"))
-        self.choose_logic_operator_cb.setItemText(1, _translate("Form", "And"))
-        self.choose_logic_operator_cb.setItemText(2, _translate("Form", "Not"))
-        self.choose_logic_operator_cb.setItemText(3, _translate("Form", "Xor"))
+        self.choose_logic_operator_cb.setItemText(0, _translate("Form", "OR"))
+        self.choose_logic_operator_cb.setItemText(1, _translate("Form", "AND"))
+        self.choose_logic_operator_cb.setItemText(2, _translate("Form", "NOT"))
+        self.choose_logic_operator_cb.setItemText(3, _translate("Form", "XOR"))
+        self.choose_logic_operator_cb.setItemText(4, _translate("Form", "NAND"))
         self.equal_symbol.setText(_translate("Form", "="))
-        self.result_label.setText(_translate("Form", "False"))
+        self.result_label.setText(_translate("Form", "True"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.logic_calculator_tab),
                                   _translate("Form", "Logic Calculator"))
         self.convertor_button.setText(_translate("Form", "Convertor"))
@@ -658,6 +660,10 @@ class Ui_Form(QMainWindow):
 
         self.undo_button.clicked.connect(lambda: self.evaluate_calculator_button("undo"))
 
+        self.choose_logic_value_1_cb.currentTextChanged.connect(self.evaluate_bool_expression)
+        self.choose_logic_value_2_cb.currentTextChanged.connect(self.evaluate_bool_expression)
+        self.choose_logic_operator_cb.currentTextChanged.connect(self.evaluate_bool_expression)
+
     def evaluate_calculator_button(self, button_type="digit"):
         calculator_text = "\n".join( self.Advanced_calculator_sheet.toPlainText().split("\n")[:-1])
         calculator_text += "\n" if calculator_text != "" else ""
@@ -708,7 +714,7 @@ class Ui_Form(QMainWindow):
                     else:
                         is_log = False
             calculator_text += ")" if self.func_typed else ""
-            result = evaluate_expression(expression)
+            result = evaluate_maths_expression(expression)
             text = (F"{calculator_text} = {result}\n", "restart")
             self.Advanced_calculator_sheet.setText(text[0])
             self.reset_calculator()
@@ -763,6 +769,17 @@ class Ui_Form(QMainWindow):
                             f"m+(add result to memory), m-(subtract result to memory).")
         msg.exec_()
         self.memory = m
+
+    def evaluate_bool_expression(self):
+        if self.choose_logic_operator_cb.currentText() == "NOT":
+            self.choose_logic_value_1_cb.setVisible(False)
+            bool1 = "Invalid"
+        else:
+            self.choose_logic_value_1_cb.setVisible(True)
+            bool1 = self.choose_logic_operator_cb.currentText()
+        self.result_label.setText(str(evaluate_logic_expression(bool1,
+                                  self.choose_logic_operator_cb.currentText(),
+                                  self.choose_logic_value_2_cb.currentText())))
 
 
 if __name__ == "__main__":
