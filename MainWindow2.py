@@ -776,7 +776,7 @@ class Ui_Form(QMainWindow):
             bool1 = "Invalid"
         else:
             self.choose_logic_value_1_cb.setVisible(True)
-            bool1 = self.choose_logic_operator_cb.currentText()
+            bool1 = self.choose_logic_value_1_cb.currentText()
         self.result_label.setText(str(evaluate_logic_expression(bool1,
                                   self.choose_logic_operator_cb.currentText(),
                                   self.choose_logic_value_2_cb.currentText())))

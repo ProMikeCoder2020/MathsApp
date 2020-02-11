@@ -47,11 +47,37 @@ def evaluate_logic_expression(bool1, boolean_operator, bool2):
         return not bool2
 
 
-def fractions_calculator(fraction1, fraction2):  # each fraction should be received in a form of a tuple with len 2
-    d_1, n_1 = fraction1  # d stands for denominator and n stands for nominator
+def fractions_calculator(fraction1, fraction2, fraction_operator):
+    # each fraction should be received in a form of a tuple with len 2-first item is denominator and second is nominator
+    base_operations = {"+": (lambda fraction1_param, fraction2_param: (fraction1_param[0],
+                                                                       fraction1_param[1] + fraction2_param[1])),
+                       "-": (lambda fraction1_param, fraction2_param: (fraction1_param[0],
+                                                                       fraction1_param[1] - fraction2_param[1])),
+                       "X": (lambda fraction1_param, fraction2_param: (fraction1_param[0] * fraction2_param[0],
+                                                                       fraction1_param[1] * fraction2_param[1])),
+                       "/": (lambda fraction1_param, fraction2_param: (fraction1_param[0] * fraction2_param[1],
+                                                                       fraction1_param[1] * fraction2_param[0]))}
+    fraction1, fraction2 = reduce_to_the_same_denominator(fraction1, fraction2) \
+        if fraction_operator in ["+", "-"] else (fraction1, fraction2)
+    # will only reduce to the same denominator if it is doing sums or subs
+    return base_operations[fraction_operator](fraction1, fraction2)
+
+
+def reduce_to_the_same_denominator(fraction1, fraction2):
+    d_1, n_1 = fraction1
     d_2, n_2 = fraction2
+    common_denominator = int(d_2) * int(d_1)
+    second_denominator = int(d_2)
+    d_2 = common_denominator
+    n_2 = int(n_2) * int(d_1)
+    d_1 = common_denominator
+    n_1 = int(n_1) * int(second_denominator)
+    return ((d_1, n_1), (d_2, n_2))
 
 
 if __name__ == "__main__":  # only for testing purposes
     while True:
-        print(evaluate_logic_expression(*(input().strip("\n").split(" "))))
+        first_fraction = tuple(input("first fraction").split(" "))
+        second_fraction = tuple(input("second fraction").split(" "))
+        operator = input("Choose an operator")
+        print(fractions_calculator(first_fraction, second_fraction, operator))
