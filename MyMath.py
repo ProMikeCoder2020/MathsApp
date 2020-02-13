@@ -1,6 +1,9 @@
 from math import sin, cos, log, tan, sqrt
 from PyQt5.QtWidgets import QMessageBox
 import operator
+from collections import namedtuple
+
+fraction = namedtuple("fraction", ["denominator", "nominator"])
 
 
 def evaluate_maths_expression(expression):
@@ -49,35 +52,51 @@ def evaluate_logic_expression(bool1, boolean_operator, bool2):
 
 def fractions_calculator(fraction1, fraction2, fraction_operator):
     # each fraction should be received in a form of a tuple with len 2-first item is denominator and second is nominator
-    base_operations = {"+": (lambda fraction1_param, fraction2_param: (fraction1_param[0],
-                                                                       fraction1_param[1] + fraction2_param[1])),
-                       "-": (lambda fraction1_param, fraction2_param: (fraction1_param[0],
-                                                                       fraction1_param[1] - fraction2_param[1])),
-                       "X": (lambda fraction1_param, fraction2_param: (fraction1_param[0] * fraction2_param[0],
-                                                                       fraction1_param[1] * fraction2_param[1])),
-                       "/": (lambda fraction1_param, fraction2_param: (fraction1_param[0] * fraction2_param[1],
-                                                                       fraction1_param[1] * fraction2_param[0]))}
+    base_operations = {"+": (lambda fraction1_param, fraction2_param: fraction(fraction1_param.denominator,
+                                                                               fraction1_param.nominator +
+                                                                               fraction2_param.nominator)),
+                       "-": (lambda fraction1_param, fraction2_param: fraction(fraction1_param.denominator,
+                                                                               fraction1_param.nominator -
+                                                                               fraction2_param.nominator)),
+                       "X": (lambda fraction1_param, fraction2_param: fraction(fraction1_param.denominator *
+                                                                               fraction2_param.denominator,
+                                                                               fraction1_param.nominator *
+                                                                               fraction2_param.nominator)),
+                       "/": (lambda fraction1_param, fraction2_param: fraction(fraction1_param.denominator *
+                                                                               fraction2_param.nominator,
+                                                                               fraction1_param.nominator *
+                                                                               fraction2_param.denominator))}
     fraction1, fraction2 = reduce_to_the_same_denominator(fraction1, fraction2) \
         if fraction_operator in ["+", "-"] else (fraction1, fraction2)
     # will only reduce to the same denominator if it is doing sums or subs
+
     return base_operations[fraction_operator](fraction1, fraction2)
 
 
 def reduce_to_the_same_denominator(fraction1, fraction2):
-    d_1, n_1 = fraction1
-    d_2, n_2 = fraction2
-    common_denominator = int(d_2) * int(d_1)
-    second_denominator = int(d_2)
-    d_2 = common_denominator
-    n_2 = int(n_2) * int(d_1)
-    d_1 = common_denominator
-    n_1 = int(n_1) * int(second_denominator)
-    return ((d_1, n_1), (d_2, n_2))
+    new_fraction_1 = fraction1
+    new_fraction_2 = fraction2
+
+    common_denominator = fraction1.denominator * fraction2.denominator
+
+    new_fraction_1 = new_fraction_1._replace(denominator=common_denominator)
+    new_fraction_2 = new_fraction_2._replace(denominator=common_denominator)
+
+    new_fraction_1 = new_fraction_1._replace(nominator=(fraction1.nominator * fraction2.denominator))
+    new_fraction_2 = new_fraction_2._replace(nominator=(fraction1.denominator * fraction2.nominator))
+    return new_fraction_1, new_fraction_2
 
 
 if __name__ == "__main__":  # only for testing purposes
     while True:
-        first_fraction = tuple(input("first fraction").split(" "))
-        second_fraction = tuple(input("second fraction").split(" "))
+        first_fraction = []
+        for atr in input().split(" "):
+            first_fraction.append(int(atr))
+        first_fraction = fraction(*first_fraction)
+        second_fraction = []
+        for atr in input().split(" "):
+            second_fraction.append(int(atr))
+        second_fraction = fraction(*second_fraction)
+
         operator = input("Choose an operator")
         print(fractions_calculator(first_fraction, second_fraction, operator))
