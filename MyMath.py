@@ -58,7 +58,7 @@ def fractions_calculator(fraction1, fraction2, fraction_operator):
                        "-": (lambda fraction1_param, fraction2_param: fraction(fraction1_param.denominator,
                                                                                fraction1_param.nominator -
                                                                                fraction2_param.nominator)),
-                       "X": (lambda fraction1_param, fraction2_param: fraction(fraction1_param.denominator *
+                       "x": (lambda fraction1_param, fraction2_param: fraction(fraction1_param.denominator *
                                                                                fraction2_param.denominator,
                                                                                fraction1_param.nominator *
                                                                                fraction2_param.nominator)),
