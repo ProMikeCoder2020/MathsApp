@@ -1,6 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMainWindow, QMessageBox
-from MyMath import evaluate_maths_expression, evaluate_logic_expression, fractions_calculator, fraction
+from MyMath import evaluate_maths_expression, evaluate_logic_expression, fractions_calculator, fraction, \
+    make_irreducible_fraction
 import sys
 
 sys._excepthook = sys.excepthook
@@ -658,7 +659,15 @@ class Ui_Form(QMainWindow):
         self.denominator_3.setText("")
         self.denominator_3.setAlignment(QtCore.Qt.AlignCenter)
         self.denominator_3.setObjectName("denominator_3")
+        self.denominator_3.setReadOnly(True)
+        self.nominator_3.setReadOnly(True)
         self.fraction_layout_3.addWidget(self.denominator_3)
+        self.reset_button = QtWidgets.QPushButton(self.fractio_calculator_page)
+        self.reset_button.setText("Reset")
+        self.reset_button.setGeometry(QtCore.QRect(250, 50, 85, 20))
+        self.make_irreducible_fraction = QtWidgets.QPushButton(self.fractio_calculator_page)
+        self.make_irreducible_fraction.setText("Convert to irreducible fraction")
+        self.make_irreducible_fraction.move(350, 300)
         self.fraction_percent_calculator_widget.addWidget(self.fractio_calculator_page)
         self.tabWidget.addTab(self.fraction_percent_calculato_tabr, "")
 
@@ -701,6 +710,10 @@ class Ui_Form(QMainWindow):
         self.back_button.clicked.connect(lambda: self.change_fraction_percent_calculator_widget_status(False, 0))
 
         self.equal_sign_2.clicked.connect(self.calculate_fractions)
+
+        self.reset_button.clicked.connect(self.reset_fraction_calculator)
+
+        self.make_irreducible_fraction.clicked.connect(self.convert_to_irreducible_fraction)
 
         self.choose_logic_value_1_cb.currentTextChanged.connect(self.evaluate_bool_expression)
         self.choose_logic_value_2_cb.currentTextChanged.connect(self.evaluate_bool_expression)
@@ -837,10 +850,22 @@ class Ui_Form(QMainWindow):
         self.denominator_3.setText(str(result.denominator))
         self.nominator_3.setText(str(result.nominator))
 
+    def reset_fraction_calculator(self):
+        for widget in [self.denominator_1, self.nominator1, self.denominator_2, self.numerator_2,
+                       self.denominator_3, self.nominator_3]:
+            widget.setText("")
+        self.fraction_operators_cb.setCurrentIndex(0)
+
+    def convert_to_irreducible_fraction(self):
+        irreducible_fraction = make_irreducible_fraction(fraction(int(self.denominator_3.text()),
+                                                                  int(self.nominator_3.text())))
+        self.denominator_3.setText(str(irreducible_fraction.denominator))
+        self.nominator_3.setText(str(irreducible_fraction.nominator))
+
 
 if __name__ == "__main__":
     import sys
-
+    print("a")
     app = QtWidgets.QApplication(sys.argv)
     ui = Ui_Form()
     ui.show()

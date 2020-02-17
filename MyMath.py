@@ -1,4 +1,4 @@
-from math import sin, cos, log, tan, sqrt
+from math import sin, cos, log, tan, sqrt, ceil
 from PyQt5.QtWidgets import QMessageBox
 import operator
 from collections import namedtuple
@@ -41,7 +41,7 @@ def evaluate_maths_expression(expression):
 
 def evaluate_logic_expression(bool1, boolean_operator, bool2):
     logic_operations = {"AND": operator.and_, "OR": operator.or_, "XOR": operator.xor,
-                        "NAND": (lambda x, y: not(x and y))}
+                        "NAND": (lambda x, y: not (x and y))}
     bool2 = True if bool2 == "True" else False
     if bool1 != "Invalid":
         bool1 = True if bool1 == "True" else False
@@ -87,6 +87,25 @@ def reduce_to_the_same_denominator(fraction1, fraction2):
     return new_fraction_1, new_fraction_2
 
 
+def make_irreducible_fraction(fraction_to_be_reduced):
+    smaller_number, bigger_number = (fraction_to_be_reduced.denominator, fraction_to_be_reduced.nominator) \
+        if fraction_to_be_reduced.denominator < \
+           fraction_to_be_reduced.nominator else \
+        (fraction_to_be_reduced.nominator,
+         fraction_to_be_reduced.denominator)
+
+    print(smaller_number)
+    for divisor in reversed(range(1, smaller_number+1)):
+        if smaller_number % divisor == 0 and bigger_number % divisor == 0:
+            fraction_to_be_reduced = fraction_to_be_reduced._replace(denominator=int(fraction_to_be_reduced.denominator
+                                                                                 / divisor),
+                                                                     nominator=int(fraction_to_be_reduced.nominator
+                                                                               / divisor))
+            break
+
+    return fraction_to_be_reduced
+
+
 if __name__ == "__main__":  # only for testing purposes
     while True:
         first_fraction = []
@@ -94,9 +113,4 @@ if __name__ == "__main__":  # only for testing purposes
             first_fraction.append(int(atr))
         first_fraction = fraction(*first_fraction)
         second_fraction = []
-        for atr in input().split(" "):
-            second_fraction.append(int(atr))
-        second_fraction = fraction(*second_fraction)
-
-        operator = input("Choose an operator")
-        print(fractions_calculator(first_fraction, second_fraction, operator))
+        print(make_irreducible_fraction(first_fraction))
