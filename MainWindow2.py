@@ -1,8 +1,9 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMainWindow, QMessageBox
 from MyMath import evaluate_maths_expression, evaluate_logic_expression, fractions_calculator, fraction, \
-    make_irreducible_fraction
+    make_irreducible_fraction, get_percentage
 import sys
+from functools import partial
 
 sys._excepthook = sys.excepthook
 
@@ -151,8 +152,10 @@ class Ui_Form(QMainWindow):
         self.convertor_button.setText(_translate("Form", "Convertor"))
         self.fraction_calculator_button.setText(_translate("Form", "Fraction Calculator"))
         self.percent_calculator_button.setText(_translate("Form", "Percentage Calculator"))
+        self.percentage_input.setText("77")
+        self.percentage_input_2.setText("100")
         self.equal_symbol_2.setText(_translate("Form", "="))
-        self.result_label_2.setText(_translate("Form", "73 "))
+        self.result_label_2.setText(_translate("Form", "77 "))
         self.percent_of_label.setText(_translate("Form", "% of "))
         self.input_type_cb.setItemText(0, _translate("Form", "Fraction"))
         self.input_type_cb.setItemText(1, _translate("Form", "Decimal number"))
@@ -376,30 +379,31 @@ class Ui_Form(QMainWindow):
         self.percentage_calculator_page = QtWidgets.QWidget()
         self.percentage_calculator_page.setObjectName("percentage_calculator_page")
         self.percentage_input_2 = QtWidgets.QLineEdit(self.percentage_calculator_page)
-        self.percentage_input_2.setGeometry(QtCore.QRect(380, 80, 91, 51))
+        self.percentage_input_2.setGeometry(QtCore.QRect(100, 80, 91, 51))
         self.percentage_input_2.setObjectName("percentage_input_2")
-        self.equal_symbol_2 = QtWidgets.QLabel(self.percentage_calculator_page)
-        self.equal_symbol_2.setGeometry(QtCore.QRect(250, 180, 131, 61))
+        self.equal_symbol_2 = QtWidgets.QPushButton(self.percentage_calculator_page)
+        self.equal_symbol_2.setGeometry(QtCore.QRect(200, 180, 131, 61))
         font = QtGui.QFont()
         font.setPointSize(72)
         self.equal_symbol_2.setFont(font)
         self.equal_symbol_2.setObjectName("equal_symbol_2")
         self.result_label_2 = QtWidgets.QLabel(self.percentage_calculator_page)
         self.result_label_2.setGeometry(QtCore.QRect(170, 280, 261, 81))
-        font = QtGui.QFont()
-        font.setPointSize(72)
         self.result_label_2.setFont(font)
         self.result_label_2.setAlignment(QtCore.Qt.AlignCenter)
         self.result_label_2.setObjectName("result_label_2")
         self.percentage_input = QtWidgets.QLineEdit(self.percentage_calculator_page)
-        self.percentage_input.setGeometry(QtCore.QRect(100, 80, 91, 51))
+        self.percentage_input.setGeometry(QtCore.QRect(380, 80, 91, 51))
         self.percentage_input.setObjectName("percentage_input")
         self.percent_of_label = QtWidgets.QLabel(self.percentage_calculator_page)
-        self.percent_of_label.setGeometry(QtCore.QRect(210, 20, 301, 171))
+        self.percent_of_label.setGeometry(QtCore.QRect(200, 50, 150, 100))
         font = QtGui.QFont()
         font.setPointSize(48)
         self.percent_of_label.setFont(font)
         self.percent_of_label.setObjectName("percent_of_label")
+        font.setPointSize(30)
+        self.percentage_input.setFont(font)
+        self.percentage_input_2.setFont(font)
         self.fraction_percent_calculator_widget.addWidget(self.percentage_calculator_page)
 
     def draw_rational_number_convertor(self):
@@ -675,7 +679,8 @@ class Ui_Form(QMainWindow):
         self.Advanced_calculator_sheet.setReadOnly(True)
         for digit_button in [self.one_button, self.two_button, self.three_button, self.four_button,
                              self.five_button, self.six_button, self.seven_button, self.eight_button,
-                             self.zero_button, self.nine_button, self.dot_button, self.open_paranthesis_button, self.closing_paranthesis_button]:
+                             self.zero_button, self.nine_button, self.dot_button, self.open_paranthesis_button,
+                             self.closing_paranthesis_button]:
             digit_button.clicked.connect(lambda: self.evaluate_calculator_button("digit"))
 
         for operator in [self.plus_button, self.minus_button, self.power_button, self.divide_button,
@@ -714,6 +719,12 @@ class Ui_Form(QMainWindow):
         self.reset_button.clicked.connect(self.reset_fraction_calculator)
 
         self.make_irreducible_fraction.clicked.connect(self.convert_to_irreducible_fraction)
+
+        self.equal_symbol_2.clicked.connect(self.calculate_percentage)
+
+        for widget, floats in {self.percentage_input: True, self.percentage_input_2: True, self.denominator_1: False,
+                               self.nominator1: False, self.denominator_2: False, self.numerator_2: False}.items():
+            widget.textChanged.connect(partial(self.accept_only_numbers, floats))
 
         self.choose_logic_value_1_cb.currentTextChanged.connect(self.evaluate_bool_expression)
         self.choose_logic_value_2_cb.currentTextChanged.connect(self.evaluate_bool_expression)
@@ -862,10 +873,26 @@ class Ui_Form(QMainWindow):
         self.denominator_3.setText(str(irreducible_fraction.denominator))
         self.nominator_3.setText(str(irreducible_fraction.nominator))
 
+    def calculate_percentage(self):
+        print("calculating percentage")
+        self.result_label_2.setText(str(get_percentage(self.percentage_input.text(), self.percentage_input_2.text())))
+        self.result_label_2.adjustSize()
+
+    def accept_only_numbers(self, allows_floats):
+        widget = self.sender()
+        digit_like_numbers = [str(x) for x in range(0, 10)]
+        print(allows_floats)
+        if allows_floats:
+            digit_like_numbers.append(".")
+        try:
+            if widget.text()[-1] not in digit_like_numbers:
+                widget.setText(widget.text()[:-1])
+        except IndexError:
+            pass
+
 
 if __name__ == "__main__":
     import sys
-    print("a")
     app = QtWidgets.QApplication(sys.argv)
     ui = Ui_Form()
     ui.show()

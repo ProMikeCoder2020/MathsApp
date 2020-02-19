@@ -94,7 +94,6 @@ def make_irreducible_fraction(fraction_to_be_reduced):
         (fraction_to_be_reduced.nominator,
          fraction_to_be_reduced.denominator)
 
-    print(smaller_number)
     for divisor in reversed(range(1, smaller_number+1)):
         if smaller_number % divisor == 0 and bigger_number % divisor == 0:
             fraction_to_be_reduced = fraction_to_be_reduced._replace(denominator=int(fraction_to_be_reduced.denominator
@@ -106,11 +105,10 @@ def make_irreducible_fraction(fraction_to_be_reduced):
     return fraction_to_be_reduced
 
 
+def get_percentage(number, percent):
+    return float(percent) / 100 * float(number)
+
+
 if __name__ == "__main__":  # only for testing purposes
     while True:
-        first_fraction = []
-        for atr in input().split(" "):
-            first_fraction.append(int(atr))
-        first_fraction = fraction(*first_fraction)
-        second_fraction = []
-        print(make_irreducible_fraction(first_fraction))
+        print(get_percentage(*input("type something").split(" ")))
