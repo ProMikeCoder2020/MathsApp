@@ -97,8 +97,8 @@ class Ui_Form(QMainWindow):
         self.retranslateUi(self)
         self.tabWidget.setCurrentIndex(0)
         self.fraction_percent_calculator_widget.setCurrentIndex(0)
-        self.input_int_cb.setCurrentIndex(3)
-        self.input_int_cb_3.setCurrentIndex(3)
+        self.input_int_cb.setCurrentIndex(0)
+        self.output_int_cb.setCurrentIndex(0)
         self.connect_buttons()
 
     def retranslateUi(self, Form):
@@ -158,13 +158,15 @@ class Ui_Form(QMainWindow):
         self.result_label_2.setText(_translate("Form", "77 "))
         self.percent_of_label.setText(_translate("Form", "% of "))
         self.input_type_cb.setItemText(0, _translate("Form", "Fraction"))
-        self.input_type_cb.setItemText(1, _translate("Form", "Decimal number"))
+        self.input_type_cb.setItemText(1, _translate("Form", "Decimal Number"))
         self.input_type_cb.setItemText(2, _translate("Form", "Percentage"))
         self.input_type_cb.setItemText(3, _translate("Form", "Mixed Numeral"))
-        self.output_type_cb.setItemText(0, _translate("Form", "Fraction"))
+        self.input_type_cb.setItemText(4, _translate("Form", "Decimal Fraction"))
+        self.output_type_cb.setItemText(0, _translate("Form", "Irreducible Fraction"))
         self.output_type_cb.setItemText(1, _translate("Form", "Decimal Number"))
         self.output_type_cb.setItemText(2, _translate("Form", "Percentage"))
         self.output_type_cb.setItemText(3, _translate("Form", "Mixed Numeral"))
+        self.output_type_cb.setItemText(4, _translate("Form", "Decimal Fraction"))
         self.to_label.setText(_translate("Form", "to"))
         self.label.setText(_translate("Form", "%"))
         self.label_3.setText(_translate("Form", "%"))
@@ -416,9 +418,11 @@ class Ui_Form(QMainWindow):
         self.input_type_cb.addItem("")
         self.input_type_cb.addItem("")
         self.input_type_cb.addItem("")
+        self.input_type_cb.addItem("")
         self.output_type_cb = QtWidgets.QComboBox(self.convertor_int_page)
         self.output_type_cb.setGeometry(QtCore.QRect(400, 70, 141, 41))
         self.output_type_cb.setObjectName("output_type_cb")
+        self.output_type_cb.addItem("")
         self.output_type_cb.addItem("")
         self.output_type_cb.addItem("")
         self.output_type_cb.addItem("")
@@ -503,9 +507,9 @@ class Ui_Form(QMainWindow):
         self.integer_inmixed_numeral_input.setGeometry(QtCore.QRect(20, 30, 31, 31))
         self.integer_inmixed_numeral_input.setObjectName("integer_inmixed_numeral_input")
         self.input_int_cb.addWidget(self.mixed_numreal_input_page)
-        self.input_int_cb_3 = QtWidgets.QStackedWidget(self.convertor_int_page)
-        self.input_int_cb_3.setGeometry(QtCore.QRect(420, 170, 111, 91))
-        self.input_int_cb_3.setObjectName("input_int_cb_3")
+        self.output_int_cb = QtWidgets.QStackedWidget(self.convertor_int_page)
+        self.output_int_cb.setGeometry(QtCore.QRect(420, 170, 111, 91))
+        self.output_int_cb.setObjectName("input_int_cb_3")
         self.fraction_input_4 = QtWidgets.QWidget()
         self.fraction_input_4.setObjectName("fraction_input_4")
         self.verticalLayoutWidget_11 = QtWidgets.QWidget(self.fraction_input_4)
@@ -529,14 +533,14 @@ class Ui_Form(QMainWindow):
         self.denominator_11.setAlignment(QtCore.Qt.AlignCenter)
         self.denominator_11.setObjectName("denominator_11")
         self.fraction_input_layout_3.addWidget(self.denominator_11)
-        self.input_int_cb_3.addWidget(self.fraction_input_4)
+        self.output_int_cb.addWidget(self.fraction_input_4)
         self.integer_input_page_3 = QtWidgets.QWidget()
         self.integer_input_page_3.setObjectName("integer_input_page_3")
         self.integer_input_5 = QtWidgets.QLineEdit(self.integer_input_page_3)
         self.integer_input_5.setGeometry(QtCore.QRect(30, 19, 41, 41))
         self.integer_input_5.setAlignment(QtCore.Qt.AlignCenter)
         self.integer_input_5.setObjectName("integer_input_5")
-        self.input_int_cb_3.addWidget(self.integer_input_page_3)
+        self.output_int_cb.addWidget(self.integer_input_page_3)
         self.page_3 = QtWidgets.QWidget()
         self.page_3.setObjectName("page_3")
         self.integer_input_6 = QtWidgets.QLineEdit(self.page_3)
@@ -549,7 +553,7 @@ class Ui_Form(QMainWindow):
         font.setPointSize(28)
         self.label_3.setFont(font)
         self.label_3.setObjectName("label_3")
-        self.input_int_cb_3.addWidget(self.page_3)
+        self.output_int_cb.addWidget(self.page_3)
         self.mixed_numreal_input_page_3 = QtWidgets.QWidget()
         self.mixed_numreal_input_page_3.setObjectName("mixed_numreal_input_page_3")
         self.verticalLayoutWidget_12 = QtWidgets.QWidget(self.mixed_numreal_input_page_3)
@@ -576,7 +580,7 @@ class Ui_Form(QMainWindow):
         self.integer_inmixed_numeral_input_3 = QtWidgets.QLineEdit(self.mixed_numreal_input_page_3)
         self.integer_inmixed_numeral_input_3.setGeometry(QtCore.QRect(20, 40, 31, 31))
         self.integer_inmixed_numeral_input_3.setObjectName("integer_inmixed_numeral_input_3")
-        self.input_int_cb_3.addWidget(self.mixed_numreal_input_page_3)
+        self.output_int_cb.addWidget(self.mixed_numreal_input_page_3)
         self.equal_symbol_4 = QtWidgets.QLabel(self.convertor_int_page)
         self.equal_symbol_4.setGeometry(QtCore.QRect(260, 180, 131, 61))
         font = QtGui.QFont()
@@ -584,6 +588,8 @@ class Ui_Form(QMainWindow):
         self.equal_symbol_4.setFont(font)
         self.equal_symbol_4.setObjectName("equal_symbol_4")
         self.fraction_percent_calculator_widget.addWidget(self.convertor_int_page)
+        for widget in self.output_int_cb.findChildren(QtWidgets.QLineEdit):
+            widget.setReadOnly(True)
 
     def draw_fraction_calculator(self):
         self.fractio_calculator_page = QtWidgets.QWidget()
@@ -729,6 +735,9 @@ class Ui_Form(QMainWindow):
         self.choose_logic_value_1_cb.currentTextChanged.connect(self.evaluate_bool_expression)
         self.choose_logic_value_2_cb.currentTextChanged.connect(self.evaluate_bool_expression)
         self.choose_logic_operator_cb.currentTextChanged.connect(self.evaluate_bool_expression)
+
+        self.input_type_cb.currentTextChanged.connect(lambda: self.change_int_input(self.input_int_cb))
+        self.output_type_cb.currentTextChanged.connect(lambda: self.change_int_input(self.output_int_cb))
 
     def evaluate_calculator_button(self, button_type="digit"):
         calculator_text = "\n".join( self.Advanced_calculator_sheet.toPlainText().split("\n")[:-1])
@@ -889,6 +898,12 @@ class Ui_Form(QMainWindow):
                 widget.setText(widget.text()[:-1])
         except IndexError:
             pass
+
+    def change_int_input(self, StackedWidget_to_change):
+        text = self.sender().currentText()
+        input_widget_dict = {"Fraction": 0, "Decimal Number": 1, "Percentage": 2, "Mixed Numeral": 3,
+                             "Decimal Fraction": 0, "Irreducible Fraction": 0}
+        StackedWidget_to_change.setCurrentIndex(input_widget_dict[text])
 
 
 if __name__ == "__main__":

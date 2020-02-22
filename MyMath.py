@@ -4,6 +4,8 @@ import operator
 from collections import namedtuple
 
 fraction = namedtuple("fraction", ["denominator", "nominator"])
+decimal_number = namedtuple("decimal_number", ["integer_part", "float_part"])
+mixed_number = namedtuple("mixed_number", ["integer_part", "fraction_part"])
 
 
 def evaluate_maths_expression(expression):
@@ -109,6 +111,30 @@ def get_percentage(number, percent):
     return float(percent) / 100 * float(number)
 
 
+def decimal_number_to_fraction(decimal):
+    fraction_denominator = int("1" + "0" * len(str(decimal.float_part)))
+    fraction_that_represents_float_part = fraction(denominator=fraction_denominator, nominator=decimal.float_part)
+    fraction_that_represents_integer_part = fraction(fraction_denominator, decimal.integer_part *
+                                                     fraction_denominator)
+    return fraction(denominator=fraction_that_represents_float_part.denominator, 
+                    nominator=fraction_that_represents_float_part.nominator + 
+                    fraction_that_represents_integer_part.nominator)
+
+
+def fraction_to_decimal_number(fraction_to_be_converted):
+    raw_decimal_number = fraction_to_be_converted.nominator / fraction_to_be_converted.denominator
+    raw_decimal_number = str(raw_decimal_number).split(".")
+    raw_decimal_number = [int(i) for i in raw_decimal_number]
+    return decimal_number(*raw_decimal_number)
+
+
+def fraction_to_decimal_fraction(fraction_to_be_converted):
+    return decimal_number_to_fraction(fraction_to_decimal_number(fraction_to_be_converted))
+
+
 if __name__ == "__main__":  # only for testing purposes
     while True:
-        print(get_percentage(*input("type something").split(" ")))
+        input_from_user = input("fraction").split("/")
+        fraction_input = fraction(int(input_from_user[1]), int(input_from_user[0]))
+        print(fraction_to_decimal_fraction(fraction_input))
+
