@@ -103,7 +103,6 @@ def make_irreducible_fraction(fraction_to_be_reduced):
                                                                      nominator=int(fraction_to_be_reduced.nominator
                                                                                / divisor))
             break
-
     return fraction_to_be_reduced
 
 
@@ -119,6 +118,7 @@ def decimal_number_to_fraction(decimal):
     return fraction(denominator=fraction_that_represents_float_part.denominator, 
                     nominator=fraction_that_represents_float_part.nominator + 
                     fraction_that_represents_integer_part.nominator)
+    # we know that this func could be reduced in size but for readability we decide to keep it this way
 
 
 def fraction_to_decimal_number(fraction_to_be_converted):
@@ -132,9 +132,55 @@ def fraction_to_decimal_fraction(fraction_to_be_converted):
     return decimal_number_to_fraction(fraction_to_decimal_number(fraction_to_be_converted))
 
 
+def mixed_number_to_fraction(mixed_number_to_be_converted):
+    return fraction(denominator=mixed_number_to_be_converted.fraction_part.denominator,
+                    nominator=mixed_number_to_be_converted.fraction_part.denominator *
+                    mixed_number_to_be_converted.integer_part + mixed_number_to_be_converted.fraction_part.nominator)
+
+
+def fraction_to_mixed_number(fraction_to_be_converted):
+    integer_part = int(fraction_to_be_converted.nominator / fraction_to_be_converted.denominator)
+    fraction_part = fraction(denominator=fraction_to_be_converted.denominator,
+                             nominator=fraction_to_be_converted.nominator - integer_part *
+                             fraction_to_be_converted.denominator)
+    return mixed_number(integer_part=integer_part, fraction_part=fraction_part)
+
+
+def percentage_to_fraction(percentage):
+    return fraction(denominator=100, nominator=percentage)
+
+
+def fraction_to_percentage(fraction_to_be_converted):
+    constant = 100 / fraction_to_be_converted.denominator
+    return fraction_to_be_converted.nominator * constant
+
+
+"""""
+ input/output_types:
+ -Fraction
+ -Decimal Number
+ -Mixed Numeral
+ -Percentage
+ output_types:
+ -Irreducible Fraction
+ -Decimal Fraction
+"""
+
+
+def convert_rational_numbers(rational_number, input_type, output_type):
+    convert_to_fraction_dict = {"Decimal Number": decimal_number_to_fraction, "Mixed Numeral": mixed_number_to_fraction,
+                                "Percentage": percentage_to_fraction, "Fraction":
+                                lambda rational_number_param: rational_number_param}
+    rational_number = convert_to_fraction_dict[input_type](rational_number)
+    fraction_to_output_dict = {"Decimal Number": fraction_to_decimal_number, "Mixed Numeral": fraction_to_mixed_number,
+                               "Percentage": fraction_to_percentage, "Irreducible Fraction": make_irreducible_fraction,
+                               "Decimal Fraction": fraction_to_decimal_fraction}
+    return fraction_to_output_dict[output_type](rational_number)
+
+
 if __name__ == "__main__":  # only for testing purposes
     while True:
         input_from_user = input("fraction").split("/")
-        fraction_input = fraction(int(input_from_user[1]), int(input_from_user[0]))
-        print(fraction_to_decimal_fraction(fraction_input))
+        fraction_input = fraction(denominator=int(input_from_user[0]), nominator=int(input_from_user[1]))
+        print(fraction_to_percentage(fraction_input))
 
