@@ -4,6 +4,8 @@ from MyMath import evaluate_maths_expression, evaluate_logic_expression, fractio
     make_irreducible_fraction, get_percentage, convert_rational_numbers, decimal_number, mixed_number
 import sys
 from functools import partial
+from collections import namedtuple
+
 
 sys._excepthook = sys.excepthook
 
@@ -27,8 +29,9 @@ class Ui_Form(QMainWindow):
         self.result = 0
         self.setupUi()
         self.reset_calculator()
-        self.previous_calculator_changes = []
-        self.previous_text = ("", 0, False, False)
+        self.previous_calculator_changes = [("", 0, False, False)]
+        self.redo_calculator_changes = []
+        self.last_text_info = ""
 
     def setupUi(self):
         self.setObjectName("Form")
@@ -130,8 +133,8 @@ class Ui_Form(QMainWindow):
         self.multiply_button.setText(_translate("Form", "x"))
         self.cosFunc_button.setText(_translate("Form", "cos()"))
         self.dot_button.setText(".")
-        self.open_paranthesis_button.setText("(")
-        self.closing_paranthesis_button.setText(")")
+        self.paranthesis_button.setText("()")
+        self.Redo_button.setText("Redo")
         self.clean_button.setText("DEL")
         self.undo_button.setText("Undo")
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.advanced_calculator_tab),
@@ -278,12 +281,12 @@ class Ui_Form(QMainWindow):
         self.dot_button = QtWidgets.QPushButton(self.gridLayoutWidget)
         self.dot_button.setObjectName("dot_button")
         self.advanced_calculator_layout.addWidget(self.dot_button, 5, 1, 1, 1)
-        self.open_paranthesis_button = QtWidgets.QPushButton(self.gridLayoutWidget)
-        self.open_paranthesis_button.setObjectName("open_paranthesis_button")
-        self.advanced_calculator_layout.addWidget(self.open_paranthesis_button, 5, 2, 1, 1)
-        self.closing_paranthesis_button = QtWidgets.QPushButton(self.gridLayoutWidget)
-        self.closing_paranthesis_button.setObjectName("closing_paranthesis_button")
-        self.advanced_calculator_layout.addWidget(self.closing_paranthesis_button, 5, 3, 1, 1)
+        self.paranthesis_button = QtWidgets.QPushButton(self.gridLayoutWidget)
+        self.paranthesis_button.setObjectName("paranthesis_button")
+        self.advanced_calculator_layout.addWidget(self.paranthesis_button, 5, 2, 1, 1)
+        self.Redo_button = QtWidgets.QPushButton(self.gridLayoutWidget)
+        self.Redo_button.setObjectName("Redo_button")
+        self.advanced_calculator_layout.addWidget(self.Redo_button, 5, 3, 1, 1)
         self.clean_button = QtWidgets.QPushButton(self.gridLayoutWidget)
         self.clean_button.setObjectName("clean_button")
         self.advanced_calculator_layout.addWidget(self.clean_button, 5, 0, 1, 1)
@@ -689,8 +692,7 @@ class Ui_Form(QMainWindow):
         self.Advanced_calculator_sheet.setReadOnly(True)
         for digit_button in [self.one_button, self.two_button, self.three_button, self.four_button,
                              self.five_button, self.six_button, self.seven_button, self.eight_button,
-                             self.zero_button, self.nine_button, self.dot_button, self.open_paranthesis_button,
-                             self.closing_paranthesis_button]:
+                             self.zero_button, self.nine_button, self.dot_button]:
             digit_button.clicked.connect(lambda: self.evaluate_calculator_button("digit"))
 
         for operator in [self.plus_button, self.minus_button, self.power_button, self.divide_button,
@@ -698,7 +700,7 @@ class Ui_Form(QMainWindow):
             operator.clicked.connect(lambda: self.evaluate_calculator_button("operator"))
 
         for func in [self.cosFunc_button, self.tanFunc_button, self.logFunc_button, self.sinFunc_button,
-                     self.squareRootFunc_button]:
+                     self.squareRootFunc_button, self.paranthesis_button]:
             func.clicked.connect(lambda: self.evaluate_calculator_button("function"))
 
         self.clean_button.clicked.connect(lambda: self.evaluate_calculator_button("clean"))
@@ -747,6 +749,8 @@ class Ui_Form(QMainWindow):
         self.output_type_cb.currentTextChanged.connect(lambda: self.connect_combo_to_stack(self.output_int_cb))
 
         self.equal_symbol_4.clicked.connect(self.convert_rational_numbers)
+
+        self.Redo_button.clicked.connect(lambda: self.evaluate_calculator_button("redo"))
 
     def evaluate_calculator_button(self, button_type="digit"):
         calculator_text = "\n".join( self.Advanced_calculator_sheet.toPlainText().split("\n")[:-1])
@@ -815,21 +819,19 @@ class Ui_Form(QMainWindow):
             self.reset_calculator()
 
         if button_type == "undo":
-            if self.previous_calculator_changes == []:
-                self.previous_calculator_changes.append(("", 0, False, False))
-            print(self.previous_calculator_changes)
-            self.Advanced_calculator_sheet.setPlainText(self.previous_calculator_changes[-1][0])
-            cursor_info = self.previous_calculator_changes[-1][1]
-            if cursor_info == "restart":
-                self.reset_calculator()
-            else:
-                self.cursor_index = cursor_info
-                self.number_typed = self.previous_calculator_changes[-1][2]
-                self.func_typed = self.previous_calculator_changes[-1][3]
-            self.previous_calculator_changes.pop(-1)
+            if len(self.previous_calculator_changes) > 1:
+                self.redo_undo_calculator(self.previous_calculator_changes, -2)
+                self.redo_calculator_changes.append(self.previous_calculator_changes[-1])
+                self.previous_calculator_changes.pop(-1)
+        elif button_type == "redo":
+            if self.redo_calculator_changes:
+                self.redo_undo_calculator(self.redo_calculator_changes, -1)
+                self.previous_calculator_changes.append(self.redo_calculator_changes[-1])
+                self.redo_calculator_changes.pop()
         else:
-            self.previous_calculator_changes.append(self.previous_text)
-            self.previous_text = text + (self.number_typed, self.func_typed)
+            self.last_text_info = text + (self.number_typed, self.func_typed)
+            self.previous_calculator_changes.append(self.last_text_info)
+            self.redo_calculator_changes.clear()
 
     def keyPressEvent(self, key):
         if key.text() == "d":
@@ -871,13 +873,17 @@ class Ui_Form(QMainWindow):
 
     def calculate_fractions(self): # note that this func only decides what input to sent to the backend code that is
         # the one making the calculations.It also handles the output.
-        result = fractions_calculator(fraction(denominator=int(self.denominator_1.text()),
-                                               nominator=int(self.nominator1.text())),
-                                      fraction(denominator=int(self.denominator_2.text()),
-                                               nominator=int(self.numerator_2.text())),
-                                      self.fraction_operators_cb.currentText())
-        self.denominator_3.setText(str(result.denominator))
-        self.nominator_3.setText(str(result.nominator))
+        try:
+            result = fractions_calculator(fraction(denominator=int(self.denominator_1.text()),
+                                                   nominator=int(self.nominator1.text())),
+                                          fraction(denominator=int(self.denominator_2.text()),
+                                                   nominator=int(self.numerator_2.text())),
+                                          self.fraction_operators_cb.currentText())
+        except ValueError:
+            self.show_empty_input_messagebox()
+        else:
+            self.denominator_3.setText(str(result.denominator))
+            self.nominator_3.setText(str(result.nominator))
 
     def reset_fraction_calculator(self):
         for widget in [self.denominator_1, self.nominator1, self.denominator_2, self.numerator_2,
@@ -892,8 +898,11 @@ class Ui_Form(QMainWindow):
         self.nominator_3.setText(str(irreducible_fraction.nominator))
 
     def calculate_percentage(self):
-        self.result_label_2.setText(str(get_percentage(self.percentage_input.text(), self.percentage_input_2.text())))
-        self.result_label_2.adjustSize()
+        try:
+            self.result_label_2.setText(str(get_percentage(self.percentage_input.text(), self.percentage_input_2.text())))
+            self.result_label_2.adjustSize()
+        except ValueError:
+            self.show_empty_input_messagebox()
 
     def accept_only_numbers(self, allows_floats):
         widget = self.sender()
@@ -915,31 +924,34 @@ class Ui_Form(QMainWindow):
             widget.setText("")
 
     def convert_rational_numbers(self):
-        input_type = self.input_type_cb.currentText()
-        output_type = self.output_type_cb.currentText()
-        rational_number_dict = {"Fraction": lambda: fraction(int(self.denominator_7.text()),
-                                                             int(self.nominator1_3.text())),
-                                "Decimal Number": self.get_decimal_number_convertor,
-                                "Percentage": lambda: int(self.integer_input_2.text()),
-                                "Mixed Numeral": lambda: mixed_number(int(self.integer_inmixed_numeral_input.text()),
-                                                                      fraction(int(self.denominator_8.text()),
-                                                                      int(self.nominator1_4.text())))}
-        output = convert_rational_numbers(rational_number_dict[input_type](), input_type, output_type)
-        print(output)
-        if output_type in ["Irreducible Fraction", "Decimal Fraction"]:
-            self.denominator_11.setText(str(output.denominator))
-            self.nominator1_7.setText(str(output.nominator))
+        try:
+            input_type = self.input_type_cb.currentText()
+            output_type = self.output_type_cb.currentText()
+            rational_number_dict = {"Fraction": lambda: fraction(int(self.denominator_7.text()),
+                                                                 int(self.nominator1_3.text())),
+                                    "Decimal Number": self.get_decimal_number_convertor,
+                                    "Percentage": lambda: int(self.integer_input_2.text()),
+                                    "Mixed Numeral": lambda: mixed_number(int(self.integer_inmixed_numeral_input.text()),
+                                                                          fraction(int(self.denominator_8.text()),
+                                                                          int(self.nominator1_4.text())))}
+            output = convert_rational_numbers(rational_number_dict[input_type](), input_type, output_type)
+            print(output)
+            if output_type in ["Irreducible Fraction", "Decimal Fraction"]:
+                self.denominator_11.setText(str(output.denominator))
+                self.nominator1_7.setText(str(output.nominator))
 
-        elif output_type == "Decimal Number":
-            self.integer_input_5.setText(".".join(str(x) for x in output))
+            elif output_type == "Decimal Number":
+                self.integer_input_5.setText(".".join(str(x) for x in output))
 
-        elif output_type == "Percentage":
-            self.integer_input_6.setText(output)
+            elif output_type == "Percentage":
+                self.integer_input_6.setText(output)
 
-        elif output_type == "Mixed Numeral":
-            self.integer_inmixed_numeral_input_3.setText(str(output.integer_part))
-            self.denominator_12.setText(str(output.fraction_part.denominator))
-            self.nominator1_8.setText(str(output.fraction_part.nominator))
+            elif output_type == "Mixed Numeral":
+                self.integer_inmixed_numeral_input_3.setText(str(output.integer_part))
+                self.denominator_12.setText(str(output.fraction_part.denominator))
+                self.nominator1_8.setText(str(output.fraction_part.nominator))
+        except ValueError:
+            self.show_empty_input_messagebox()
 
     def get_decimal_number_convertor(self):
         raw_decimal = self.integer_input.text().split(".")
@@ -947,6 +959,24 @@ class Ui_Form(QMainWindow):
             return decimal_number(int(raw_decimal[0]), int(raw_decimal[1]))
         except IndexError:
             return decimal_number(int(raw_decimal[0]), 0)
+
+    @staticmethod
+    def show_empty_input_messagebox():
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Warning)
+        msg.setWindowTitle("Syntax Error")
+        msg.setText("You tried to perform an operation without giving us enough input.Pls fill the empty textboxes")
+        msg.exec_()
+
+    def redo_undo_calculator(self, li, index):
+        cursor_info = li[index][1]
+        self.Advanced_calculator_sheet.setPlainText(li[index][0])
+        if cursor_info == "restart":
+            self.reset_calculator()
+        else:
+            self.cursor_index = cursor_info
+            self.number_typed = li[index][2]
+            self.func_typed = li[index][3]
 
 
 if __name__ == "__main__":
