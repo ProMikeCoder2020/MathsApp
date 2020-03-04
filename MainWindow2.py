@@ -1,7 +1,8 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMainWindow, QMessageBox
-from MyMath import evaluate_maths_expression, evaluate_logic_expression, fractions_calculator, fraction, \
-    make_irreducible_fraction, get_percentage, convert_rational_numbers, decimal_number, mixed_number
+from PyQt5.QtWidgets import QMainWindow, QMessageBox, QWidget
+from PyQt5.QtCore import Qt
+from MyMath import *
+from collections import OrderedDict
 import sys
 from functools import partial
 from collections import namedtuple
@@ -25,6 +26,7 @@ class Ui_Form(QMainWindow):
 
     def __init__(self):
         super(Ui_Form, self).__init__()
+        self.units = OrderedDict([("Metres", length), ("Miles", length), ("Imperial System(length)", length)])
         self.memory = 0
         self.result = 0
         self.setupUi()
@@ -42,61 +44,8 @@ class Ui_Form(QMainWindow):
         self.draw_advanced_calculator()
         self.draw_logical_calculator()
         self.draw_fraction_percent_calculator()
-        self.tab_2 = QtWidgets.QWidget()
-        self.tab_2.setObjectName("tab_2")
-        self.widget = QtWidgets.QWidget(self.tab_2)
-        self.widget.setGeometry(QtCore.QRect(70, 30, 521, 41))
-        self.widget.setObjectName("widget")
-        self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.widget)
-        self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
-        self.function_label = QtWidgets.QLabel(self.widget)
-        font = QtGui.QFont()
-        font.setPointSize(16)
-        self.function_label.setFont(font)
-        self.function_label.setObjectName("function_label")
-        self.horizontalLayout_2.addWidget(self.function_label)
-        self.f_of_x_label = QtWidgets.QLabel(self.widget)
-        font = QtGui.QFont()
-        font.setPointSize(16)
-        self.f_of_x_label.setFont(font)
-        self.f_of_x_label.setObjectName("f_of_x_label")
-        self.horizontalLayout_2.addWidget(self.f_of_x_label)
-        self.func_input = QtWidgets.QLineEdit(self.widget)
-        self.func_input.setObjectName("func_input")
-        self.horizontalLayout_2.addWidget(self.func_input)
-        self.tabWidget.addTab(self.tab_2, "")
-        self.tab_6 = QtWidgets.QWidget()
-        self.tab_6.setObjectName("tab_6")
-        self.comboBox = QtWidgets.QComboBox(self.tab_6)
-        self.comboBox.setGeometry(QtCore.QRect(190, 30, 171, 61))
-        self.comboBox.setObjectName("comboBox")
-        self.comboBox_2 = QtWidgets.QComboBox(self.tab_6)
-        self.comboBox_2.setGeometry(QtCore.QRect(130, 190, 71, 41))
-        self.comboBox_2.setObjectName("comboBox_2")
-        self.comboBox_3 = QtWidgets.QComboBox(self.tab_6)
-        self.comboBox_3.setGeometry(QtCore.QRect(450, 190, 69, 41))
-        self.comboBox_3.setObjectName("comboBox_3")
-        self.label_5 = QtWidgets.QLabel(self.tab_6)
-        self.label_5.setGeometry(QtCore.QRect(360, 180, 101, 61))
-        font = QtGui.QFont()
-        font.setPointSize(48)
-        self.label_5.setFont(font)
-        self.label_5.setObjectName("label_5")
-        self.equal_sign_4 = QtWidgets.QLabel(self.tab_6)
-        self.equal_sign_4.setGeometry(QtCore.QRect(250, 180, 121, 41))
-        font = QtGui.QFont()
-        font.setPointSize(72)
-        self.equal_sign_4.setFont(font)
-        self.equal_sign_4.setObjectName("equal_sign_4")
-        self.lineEdit = QtWidgets.QLineEdit(self.tab_6)
-        self.lineEdit.setGeometry(QtCore.QRect(30, 180, 81, 61))
-        font = QtGui.QFont()
-        font.setPointSize(48)
-        self.lineEdit.setFont(font)
-        self.lineEdit.setObjectName("lineEdit")
-        self.tabWidget.addTab(self.tab_6, "")
-
+        self.draw_func_calculator()
+        self.draw_units_convertor()
         self.retranslateUi(self)
         self.tabWidget.setCurrentIndex(0)
         self.fraction_percent_calculator_widget.setCurrentIndex(0)
@@ -183,10 +132,8 @@ class Ui_Form(QMainWindow):
         self.function_label.setText(_translate("Form", "Function :"))
         self.f_of_x_label.setText(_translate("Form", "f(x)="))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("Form", "Function utilities"))
-        self.label_5.setText(_translate("Form", "10"))
-        self.equal_sign_4.setText(_translate("Form", "="))
-        self.lineEdit.setText(_translate("Form", "10"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_6), _translate("Form", "Metric units convertor"))
+        self.equal_sign_units_convertor.setText(_translate("Form", "="))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_6), _translate("Form", "Units convertor"))
 
     def draw_advanced_calculator(self):
         self.advanced_calculator_tab = QtWidgets.QWidget()
@@ -688,6 +635,87 @@ class Ui_Form(QMainWindow):
         self.fraction_percent_calculator_widget.addWidget(self.fractio_calculator_page)
         self.tabWidget.addTab(self.fraction_percent_calculato_tabr, "")
 
+    def draw_func_calculator(self):
+        self.tab_2 = QtWidgets.QWidget()
+        self.tab_2.setObjectName("tab_2")
+        self.widget = QtWidgets.QWidget(self.tab_2)
+        self.widget.setGeometry(QtCore.QRect(70, 30, 521, 41))
+        self.widget.setObjectName("widget")
+        self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.widget)
+        self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        self.function_label = QtWidgets.QLabel(self.widget)
+        font = QtGui.QFont()
+        font.setPointSize(16)
+        self.function_label.setFont(font)
+        self.function_label.setObjectName("function_label")
+        self.horizontalLayout_2.addWidget(self.function_label)
+        self.f_of_x_label = QtWidgets.QLabel(self.widget)
+        font = QtGui.QFont()
+        font.setPointSize(16)
+        self.f_of_x_label.setFont(font)
+        self.f_of_x_label.setObjectName("f_of_x_label")
+        self.horizontalLayout_2.addWidget(self.f_of_x_label)
+        self.func_input = QtWidgets.QLineEdit(self.widget)
+        self.func_input.setObjectName("func_input")
+        self.horizontalLayout_2.addWidget(self.func_input)
+        self.tabWidget.addTab(self.tab_2, "")
+
+    def draw_units_convertor(self):
+        # creates new tab
+        self.tab_6 = QtWidgets.QWidget()
+        self.tab_6.setObjectName("tab_6")
+
+        # draws the combobox that let the user select unit type
+        self.unit_type_input = QtWidgets.QComboBox(self.tab_6)  # draws the leftmost upper combobox
+        self.unit_type_input.setObjectName("unit_type_input")
+        self.unit_type_input.setGeometry(120, 90, 95, 40)
+
+        self.unit_type_output = QtWidgets.QComboBox(self.tab_6)  # draws the leftmost upper combobox
+        self.unit_type_output.setObjectName("unit_type_output")
+        self.unit_type_output.setGeometry(440, 90, 95, 40)
+
+        for i in sorted(self.units):  # defines the basic units
+            self.unit_type_input.addItem(i)
+            self.unit_type_output.addItem(i)
+
+        self.to_unit_label = QtWidgets.QLabel(self.tab_6)  # draws the label that is between that previous 2 comboboxes
+        self.to_unit_label.setText("to")
+        self.to_unit_label.setFont(QtGui.QFont("Arial", 40))
+        self.to_unit_label.setGeometry(225, 90, 205, 40)
+        self.to_unit_label.setAlignment(QtCore.Qt.AlignCenter)
+
+        # draws combo boxes tha manage unit multiples (user input based, so both can be changed by the user)
+        self.select_unit_multyple_input = QtWidgets.QComboBox(self.tab_6)  # input combobox
+        self.select_unit_multyple_input.setGeometry(QtCore.QRect(130, 190, 71, 41))
+        self.select_unit_multyple_input.setObjectName("select_unit_multyple_input")
+
+        self.select_unit_multyple_output = QtWidgets.QComboBox(self.tab_6)  # output combobox
+        self.select_unit_multyple_output.setGeometry(QtCore.QRect(450, 190, 69, 41))
+        self.select_unit_multyple_output.setObjectName("select_unit_multyple_output")
+
+        # draws the label that shows the output of the desired calculations
+        self.convertor_output_label = QtWidgets.QLabel(self.tab_6)
+        self.convertor_output_label.setGeometry(QtCore.QRect(340, 180, 101, 61))
+        self.convertor_output_label.setFont(QtGui.QFont("Arial", 12))
+        self.convertor_output_label.setObjectName("convertor_output_label")
+
+        # draws the equal sign button
+        self.equal_sign_units_convertor = QtWidgets.QPushButton(self.tab_6)
+        self.equal_sign_units_convertor.setGeometry(QtCore.QRect(215, 190, 121, 41))
+        self.equal_sign_units_convertor.setFont(QtGui.QFont("Arial", 60))
+        self.equal_sign_units_convertor.setObjectName("equal_sign_4")
+
+        # draws the textbox that lets the user decide how much of a multiple they want
+        self.input_quantity_unit_convertor = QtWidgets.QLineEdit(self.tab_6)
+        self.input_quantity_unit_convertor.setGeometry(QtCore.QRect(30, 180, 81, 61))
+        self.input_quantity_unit_convertor.setFont(QtGui.QFont("Arial", 12))
+        self.input_quantity_unit_convertor.setObjectName("input_quantity_unit_convertor")
+
+        self.tabWidget.addTab(self.tab_6, "")
+        self.change_input_output_hypothesis(self.unit_type_input, self.select_unit_multyple_input)
+        self.change_input_output_hypothesis(self.unit_type_output, self.select_unit_multyple_output)
+
     def connect_buttons(self):
         self.Advanced_calculator_sheet.setReadOnly(True)
         for digit_button in [self.one_button, self.two_button, self.three_button, self.four_button,
@@ -751,6 +779,19 @@ class Ui_Form(QMainWindow):
         self.equal_symbol_4.clicked.connect(self.convert_rational_numbers)
 
         self.Redo_button.clicked.connect(lambda: self.evaluate_calculator_button("redo"))
+
+        self.unit_type_input.currentTextChanged.connect(lambda: self.set_output_combobox_index(self.unit_type_output.
+                                                        findText(self.unit_type_input.currentText(),
+                                                                 Qt.MatchFixedString)))
+        self.unit_type_input.currentTextChanged.connect(lambda: self.change_input_output_hypothesis
+                                                        (self.unit_type_input, self.select_unit_multyple_input))
+        self.unit_type_output.currentTextChanged.connect(lambda: self.change_input_output_hypothesis
+                                                         (self.unit_type_output, self.select_unit_multyple_output))
+
+        self.equal_sign_units_convertor.clicked.connect(self.convert_stuff)
+
+        self.select_unit_multyple_output.currentTextChanged.connect(self.update_convertor_output_quantity)
+        self.select_unit_multyple_input.currentTextChanged.connect(self.update_convertor_output_quantity)
 
     def evaluate_calculator_button(self, button_type="digit"):
         calculator_text = "\n".join( self.Advanced_calculator_sheet.toPlainText().split("\n")[:-1])
@@ -880,7 +921,7 @@ class Ui_Form(QMainWindow):
                                                    nominator=int(self.numerator_2.text())),
                                           self.fraction_operators_cb.currentText())
         except ValueError:
-            self.show_empty_input_messagebox()
+            self.show_empty_input_message_box()
         else:
             self.denominator_3.setText(str(result.denominator))
             self.nominator_3.setText(str(result.nominator))
@@ -902,7 +943,7 @@ class Ui_Form(QMainWindow):
             self.result_label_2.setText(str(get_percentage(self.percentage_input.text(), self.percentage_input_2.text())))
             self.result_label_2.adjustSize()
         except ValueError:
-            self.show_empty_input_messagebox()
+            self.show_empty_input_message_box()
 
     def accept_only_numbers(self, allows_floats):
         widget = self.sender()
@@ -944,14 +985,14 @@ class Ui_Form(QMainWindow):
                 self.integer_input_5.setText(".".join(str(x) for x in output))
 
             elif output_type == "Percentage":
-                self.integer_input_6.setText(output)
+                self.integer_input_6.setText(str(output))
 
             elif output_type == "Mixed Numeral":
                 self.integer_inmixed_numeral_input_3.setText(str(output.integer_part))
                 self.denominator_12.setText(str(output.fraction_part.denominator))
                 self.nominator1_8.setText(str(output.fraction_part.nominator))
         except ValueError:
-            self.show_empty_input_messagebox()
+            self.show_empty_input_message_box()
 
     def get_decimal_number_convertor(self):
         raw_decimal = self.integer_input.text().split(".")
@@ -961,7 +1002,7 @@ class Ui_Form(QMainWindow):
             return decimal_number(int(raw_decimal[0]), 0)
 
     @staticmethod
-    def show_empty_input_messagebox():
+    def show_empty_input_message_box():
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Warning)
         msg.setWindowTitle("Syntax Error")
@@ -977,6 +1018,38 @@ class Ui_Form(QMainWindow):
             self.cursor_index = cursor_info
             self.number_typed = li[index][2]
             self.func_typed = li[index][3]
+
+    def set_output_combobox_index(self, index):  # sets the output unit combobox index to the argument passed
+        self.unit_type_output.setCurrentIndex(index)
+
+    def change_input_output_hypothesis(self, sender, widget):
+        unit_selected = sender.currentText()
+        multiples = self.units[unit_selected].different_units_correspondence[unit_selected][1].multiples_dict.keys()
+        widget.clear()
+        for multiple in multiples:
+            widget.addItem(multiple)
+
+    def convert_stuff(self):
+        print("converting stuff")
+        unit_selected = self.unit_type_input.currentText()
+        if unit_selected == self.unit_type_output.currentText():
+            text = self.units[unit_selected].different_units_correspondence[unit_selected][1].convert_multiples \
+                      (self.select_unit_multyple_input.currentText(), int(self.input_quantity_unit_convertor.text()),
+                       self.select_unit_multyple_output.currentText())
+        else:
+            text = self.units[unit_selected].convert_between_different_units(self.unit_type_input.currentText(),
+                                                                             int(self.input_quantity_unit_convertor.
+                                                                                 text()),
+                                                                             self.select_unit_multyple_input.
+                                                                             currentText(),
+                                                                             self.unit_type_output.currentText(),
+                                                                             self.select_unit_multyple_output.
+                                                                             currentText())
+
+        self.convertor_output_label.setText(str(round(text, 4)))
+
+    def update_convertor_output_quantity(self):
+        self.convertor_output_label.setText("")
 
 
 if __name__ == "__main__":

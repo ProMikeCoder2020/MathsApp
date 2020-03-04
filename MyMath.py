@@ -1,7 +1,7 @@
 from math import sin, cos, log, tan, sqrt, ceil
 from PyQt5.QtWidgets import QMessageBox
 import operator
-from collections import namedtuple
+from collections import namedtuple, OrderedDict
 
 fraction = namedtuple("fraction", ["denominator", "nominator"])
 decimal_number = namedtuple("decimal_number", ["integer_part", "float_part"])
@@ -176,6 +176,72 @@ def convert_rational_numbers(rational_number, input_type, output_type):
                                "Percentage": fraction_to_percentage, "Irreducible Fraction": make_irreducible_fraction,
                                "Decimal Fraction": fraction_to_decimal_fraction}
     return fraction_to_output_dict[output_type](rational_number)
+
+
+class ThingsThatCanBeMeasured:
+    def __init__(self, different_units_correspondence):
+        # saves what is the correspondence between the secondary units and the si_unit
+        self.different_units_correspondence = different_units_correspondence
+        """"
+        note that in this dict like in the units dict the value is how many si_units / main_units there are in that 
+        multiple / unit
+        """
+
+    def convert_between_different_units(self, input_unit, input_quantity, input_multiple, output_unit, output_multiple):
+        input_unit_object = self.different_units_correspondence[input_unit][1]
+        output_unit_object = self.different_units_correspondence[output_unit][1]
+        input_quantity_in_main_unit = input_unit_object.convert_multiples(input_multiple, input_quantity,
+                                                                          input_unit_object.main_multiple)
+        quantity_in_si_unit = input_quantity_in_main_unit * self.different_units_correspondence[input_unit][0]
+        output = quantity_in_si_unit / self.different_units_correspondence[output_unit][0]
+        output_quantity_in_passed_multiple = output_unit_object.convert_multiples(output_unit_object.main_multiple,
+                                                                                  output, output_multiple)
+        print(output_quantity_in_passed_multiple)
+        return output_quantity_in_passed_multiple
+
+
+class Unit:
+    def __init__(self, main_unit, unit_dict):
+        self.multiples_dict = unit_dict  # ordered dict that stores the multiples and sub-multiples of a unit
+        self.main_multiple = main_unit  # the main unit(the one used to convert to other units and multiples)
+
+    def convert_multiples(self, input_multiple, input_quantity, output_multiple):  # it is working, don´t change
+        # function that converts between multiples of the same unit. Ex: m - cm
+        quantity_in_metres = input_quantity * self.multiples_dict[input_multiple]
+        return quantity_in_metres / self.multiples_dict[output_multiple]
+
+    @staticmethod
+    def generate_si_unit_dict(main_unit, abbreviation):
+        # function that helps generate SI unit dicts(See above for more info).
+        base_dict = OrderedDict()
+
+        expressions = [10 ** (-24 + n * 3) for n in range(0, 18) if n != 8]
+        expressions.insert(8, 1 / 100)
+        expressions.insert(9, 1 / 10)
+        expressions.insert(10, 1)
+        expressions.insert(11, 10)
+        expressions.insert(12, 100)
+
+        multiples = ["y", "z", "a", "f", "p", "n", "micro", "m", "c", "d", main_unit, "da", "h", "k", "M", "G", "T",
+                     "P", "E", "Z", "Y"]
+
+        for x, expression in zip(multiples, expressions):
+
+            if multiples.index(x) == 10:
+                base_dict[main_unit] = expression
+            else:
+                base_dict[x + abbreviation] = expression
+        return base_dict
+
+
+# defines units that measure length
+metres_unit = Unit("metre", Unit.generate_si_unit_dict("metre", "m"))
+miles = Unit("English Mile", OrderedDict([("English Mile", 1), ("Roman Mile", 0.92), ("Nautical Mile", 1.1508),
+                                          ("Welsh Mile", 3), ("Irish Mile", 1.27), ("Scots Mile", 1.123),
+                                          ("Arabic Mile", 1.18061)]))
+inches = Unit("Inches", OrderedDict([("Inch", 1), ("Foot", 12), ("Yard", 36)]))
+
+length = ThingsThatCanBeMeasured({"Miles": (1609.34, miles), "Metres": (1, metres_unit), "Inches": (0.0254, inches)})
 
 
 if __name__ == "__main__":  # only for testing purposes
